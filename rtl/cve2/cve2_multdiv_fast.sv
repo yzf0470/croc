@@ -27,6 +27,7 @@ module cve2_multdiv_fast #(
   input  logic  [1:0]      signed_mode_i,
   input  logic [31:0]      op_a_i,
   input  logic [31:0]      op_b_i,
+  input  logic [31:0]      op_c_i,     // the third operand used in accumulation
   input  logic [33:0]      alu_adder_ext_i,
   input  logic [31:0]      alu_adder_i,
   input  logic             equal_to_zero_i,
@@ -49,6 +50,7 @@ module cve2_multdiv_fast #(
   logic        [34:0] mac_res_ext;
   logic        [33:0] accum;
   logic        sign_a, sign_b;
+  logic        sign_c;
   logic        mult_valid;
   logic        signed_mult;
 
@@ -127,7 +129,9 @@ module cve2_multdiv_fast #(
   assign unused_mac_res_ext = mac_res_ext[34];
 
   assign signed_mult      = (signed_mode_i != 2'b00);
-  assign multdiv_result_o = div_sel_i ? imd_val_q_i[0][31:0] : mac_res_d[31:0];
+  assign multdiv_result_o = (operator_i == MD_OP_MACCH) ? macc_res_full[63:32] :
+                            (operator_i == MD_OP_MACCL) ? macc_res_full[31: 0] :
+                            (div_sel_i ? imd_val_q_i[0][31:0] : mac_res_d[31:0]);
 
   // The single cycle multiplier uses three 17 bit multipliers to compute MUL instructions in a
   // single cycle and MULH instructions in two cycles.
@@ -256,6 +260,7 @@ module cve2_multdiv_fast #(
   end else begin : gen_mult_fast
     logic [15:0] mult_op_a;
     logic [15:0] mult_op_b;
+    logic [63:0] macc_res_full;
 
     typedef enum logic [1:0] {
       ALBL, ALBH, AHBL, AHBH
@@ -290,7 +295,8 @@ module cve2_multdiv_fast #(
           mult_op_b = op_b_i[`OP_L];
           sign_a    = 1'b0;
           sign_b    = 1'b0;
-          accum     = '0;
+          accum     = (operator_i == MD_OP_MACCH || operator_i == MD_OP_MACCL) 
+                      ? {{2{op_c_i[31]}}, op_c_i} : '0;
           mac_res_d = mac_res;
           mult_state_d = ALBH;
         end
@@ -344,6 +350,8 @@ module cve2_multdiv_fast #(
           accum[33:18]  = {16{signed_mult & imd_val_q_i[0][33]}};
           // result of AH*BL is not signed only if signed_mode_i == 2'b00
           mac_res_d    = mac_res;
+          macc_res_full= (operator_i == MD_OP_MACCH || operator_i == MD_OP_MACCL) 
+                        ? {mac_res, imd_val_q_i[0][31:0]} : '0;
           mult_valid   = 1'b1;
 
           // Note no state transition will occur if mult_hold is set

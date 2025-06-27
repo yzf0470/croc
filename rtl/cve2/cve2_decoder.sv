@@ -54,9 +54,11 @@ module cve2_decoder #(
   output logic                 rf_we_o,          // write enable for regfile
   output logic [4:0]           rf_raddr_a_o,
   output logic [4:0]           rf_raddr_b_o,
+  output logic [4:0]           rf_raddr_c_o,
   output logic [4:0]           rf_waddr_o,
   output logic                 rf_ren_a_o,          // Instruction reads from RF addr A
   output logic                 rf_ren_b_o,          // Instruction reads from RF addr B
+  output logic                 rf_ren_c_o,          // Instruction reads from RF addr C
 
   // ALU
   output cve2_pkg::alu_op_e    alu_operator_o,        // ALU operation selection
@@ -543,6 +545,16 @@ module cve2_decoder #(
             {7'b000_0001, 3'b111}: begin // remu
               multdiv_operator_o    = MD_OP_REM;
               multdiv_signed_mode_o = 2'b00;
+              illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
+            end
+            {7'b000_0011, 3'b000}: begin // maccl
+              multdiv_operator_o    = MD_OP_MACCL;
+              multdiv_signed_mode_o = 2'b11;
+              illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
+            end
+            {7'b000_0011, 3'b001}: begin // macch
+              multdiv_operator_o    = MD_OP_MACCH;
+              multdiv_signed_mode_o = 2'b11;
               illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
             end
             default: begin

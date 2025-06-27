@@ -155,8 +155,11 @@ module cve2_core import cve2_pkg::*; #(
   logic [31:0] rf_rdata_a;
   logic [4:0]  rf_raddr_b;
   logic [31:0] rf_rdata_b;
+  logic [4:0]  rf_raddr_c;
+  logic [31:0] rf_rdata_c;
   logic        rf_ren_a;
   logic        rf_ren_b;
+  logic        rf_ren_c;
   logic [4:0]  rf_waddr_wb;
   logic [31:0] rf_wdata_wb;
   // Writeback register write data that can be used on the forwarding path (doesn't factor in memory
@@ -186,6 +189,7 @@ module cve2_core import cve2_pkg::*; #(
   logic [1:0]  multdiv_signed_mode_ex;
   logic [31:0] multdiv_operand_a_ex;
   logic [31:0] multdiv_operand_b_ex;
+  logic [31:0] multdiv_operand_c_ex;
 
   // CSR control
   logic        csr_access;
@@ -409,6 +413,7 @@ module cve2_core import cve2_pkg::*; #(
     .multdiv_signed_mode_ex_o(multdiv_signed_mode_ex),
     .multdiv_operand_a_ex_o  (multdiv_operand_a_ex),
     .multdiv_operand_b_ex_o  (multdiv_operand_b_ex),
+    .multdiv_operand_c_ex_o  (multdiv_operand_c_ex),
 
     // CSR ID/EX
     .csr_access_o         (csr_access),
@@ -462,8 +467,11 @@ module cve2_core import cve2_pkg::*; #(
     .rf_rdata_a_i      (rf_rdata_a),
     .rf_raddr_b_o      (rf_raddr_b),
     .rf_rdata_b_i      (rf_rdata_b),
+    .rf_raddr_c_o      (rf_raddr_c),
+    .rf_rdata_c_i      (rf_rdata_c),
     .rf_ren_a_o        (rf_ren_a),
     .rf_ren_b_o        (rf_ren_b),
+    .rf_ren_c_o        (rf_ren_c),
     .rf_waddr_id_o     (rf_waddr_id),
     .rf_wdata_id_o     (rf_wdata_id),
     .rf_we_id_o        (rf_we_id),
@@ -506,6 +514,7 @@ module cve2_core import cve2_pkg::*; #(
     .multdiv_signed_mode_i(multdiv_signed_mode_ex),
     .multdiv_operand_a_i  (multdiv_operand_a_ex),
     .multdiv_operand_b_i  (multdiv_operand_b_ex),
+    .multdiv_operand_c_i  (multdiv_operand_c_ex),
 
     // Intermediate value register
     .imd_val_we_o(imd_val_we_ex),
@@ -653,6 +662,8 @@ module cve2_core import cve2_pkg::*; #(
     .rdata_a_o(rf_rdata_a),
     .raddr_b_i(rf_raddr_b),
     .rdata_b_o(rf_rdata_b),
+    .raddr_c_i(rf_raddr_c),
+    .rdata_c_o(rf_rdata_c),
     .waddr_a_i(rf_waddr_wb),
     .wdata_a_i(rf_wdata_wb),
     .we_a_i   (rf_we_wb)
