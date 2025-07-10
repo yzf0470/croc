@@ -547,12 +547,12 @@ module cve2_decoder #(
               multdiv_signed_mode_o = 2'b00;
               illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
             end
-            {7'b000_0011, 3'b000}: begin // maccl
+            {7'b000_1001, 3'b000}: begin // maccl
               multdiv_operator_o    = MD_OP_MACCL;
               multdiv_signed_mode_o = 2'b11;
               illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
             end
-            {7'b000_0011, 3'b001}: begin // macch
+            {7'b000_1001, 3'b001}: begin // macch
               multdiv_operator_o    = MD_OP_MACCH;
               multdiv_signed_mode_o = 2'b11;
               illegal_insn          = (RV32M == RV32MNone) ? 1'b1 : 1'b0;
@@ -1111,7 +1111,14 @@ module cve2_decoder #(
               alu_operator_o = ALU_ADD;
               div_sel_o      = (RV32M == RV32MNone) ? 1'b0 : 1'b1;
             end
-
+            {7'b000_1001, 3'b000}: begin // maccl
+              alu_operator_o = ALU_ADD;
+              mult_sel_o     = (RV32M == RV32MNone) ? 1'b0 : 1'b1;
+            end
+            {7'b000_1001, 3'b001}: begin // macch
+              alu_operator_o = ALU_ADD;
+              mult_sel_o     = (RV32M == RV32MNone) ? 1'b0 : 1'b1;
+            end
             default: ;
           endcase
         end
