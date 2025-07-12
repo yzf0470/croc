@@ -76,6 +76,7 @@ module cve2_id_stage #(
   output logic  [1:0]               multdiv_signed_mode_ex_o,
   output logic [31:0]               multdiv_operand_a_ex_o,
   output logic [31:0]               multdiv_operand_b_ex_o,
+  output logic [31:0]               multdiv_operand_c_ex_o,
 
   // CSR
   output logic                      csr_access_o,
@@ -130,8 +131,11 @@ module cve2_id_stage #(
   input  logic [31:0]               rf_rdata_a_i,
   output logic [4:0]                rf_raddr_b_o,
   input  logic [31:0]               rf_rdata_b_i,
+  output logic [4:0]                rf_raddr_c_o,
+  input  logic [31:0]               rf_rdata_c_i,
   output logic                      rf_ren_a_o,
   output logic                      rf_ren_b_o,
+  output logic                      rf_ren_c_o,
 
   // Register file write (via writeback)
   output logic [4:0]                rf_waddr_id_o,
@@ -197,18 +201,21 @@ module cve2_id_stage #(
 
   rf_wd_sel_e  rf_wdata_sel;
   logic        rf_we_dec, rf_we_raw;
-  logic        rf_ren_a, rf_ren_b;
-  logic        rf_ren_a_dec, rf_ren_b_dec;
+  logic        rf_ren_a, rf_ren_b, rf_ren_c;
+  logic        rf_ren_a_dec, rf_ren_b_dec, rf_ren_c_dec;
 
   // Read enables should only be asserted for valid and legal instructions
   assign rf_ren_a = instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o & rf_ren_a_dec;
   assign rf_ren_b = instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o & rf_ren_b_dec;
+  assign rf_ren_c = instr_valid_i & ~instr_fetch_err_i & ~illegal_insn_o & rf_ren_c_dec;
 
   assign rf_ren_a_o = rf_ren_a;
   assign rf_ren_b_o = rf_ren_b;
+  assign rf_ren_c_o = rf_ren_c;
 
   logic [31:0] rf_rdata_a_fwd;
   logic [31:0] rf_rdata_b_fwd;
+  logic [31:0] rf_rdata_c_fwd;
 
   // ALU Control
   alu_op_e     alu_operator;
@@ -373,9 +380,11 @@ module cve2_id_stage #(
 
     .rf_raddr_a_o(rf_raddr_a_o),
     .rf_raddr_b_o(rf_raddr_b_o),
+    .rf_raddr_c_o(rf_raddr_c_o),
     .rf_waddr_o  (rf_waddr_id_o),
     .rf_ren_a_o  (rf_ren_a_dec),
     .rf_ren_b_o  (rf_ren_b_dec),
+    .rf_ren_c_o  (rf_ren_c_dec),
 
     // ALU
     .alu_operator_o    (alu_operator),
@@ -552,6 +561,7 @@ module cve2_id_stage #(
   assign multdiv_signed_mode_ex_o    = multdiv_signed_mode;
   assign multdiv_operand_a_ex_o      = rf_rdata_a_fwd;
   assign multdiv_operand_b_ex_o      = rf_rdata_b_fwd;
+  assign multdiv_operand_c_ex_o      = rf_rdata_c_fwd;
 
   ////////////////////////
   // Branch set control //
@@ -741,6 +751,7 @@ module cve2_id_stage #(
     // register file
     assign rf_rdata_a_fwd = rf_rdata_a_i;
     assign rf_rdata_b_fwd = rf_rdata_b_i;
+    assign rf_rdata_c_fwd = rf_rdata_c_i;
 
     // Unused Writeback stage only IO & wiring
     // Assign inputs and internal wiring to unused signals to satisfy lint checks

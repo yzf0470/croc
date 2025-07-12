@@ -30,6 +30,7 @@ module cve2_ex_block #(
   input  logic  [1:0]           multdiv_signed_mode_i,
   input  logic [31:0]           multdiv_operand_a_i,
   input  logic [31:0]           multdiv_operand_b_i,
+  input  logic [31:0]           multdiv_operand_c_i,
 
   // intermediate val reg
   output logic [1:0]            imd_val_we_o,
@@ -154,6 +155,7 @@ module cve2_ex_block #(
       .signed_mode_i     (multdiv_signed_mode_i),
       .op_a_i            (multdiv_operand_a_i),
       .op_b_i            (multdiv_operand_b_i),
+      .op_c_i            (multdiv_operand_c_i),
       .alu_operand_a_o   (multdiv_alu_operand_a),
       .alu_operand_b_o   (multdiv_alu_operand_b),
       .alu_adder_ext_i   (alu_adder_result_ext),

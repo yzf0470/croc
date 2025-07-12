@@ -27,6 +27,7 @@ module cve2_multdiv_fast #(
   input  logic  [1:0]      signed_mode_i,
   input  logic [31:0]      op_a_i,
   input  logic [31:0]      op_b_i,
+  input  logic [31:0]      op_c_i,     // the third operand used in accumulation
   input  logic [33:0]      alu_adder_ext_i,
   input  logic [31:0]      alu_adder_i,
   input  logic             equal_to_zero_i,
@@ -49,6 +50,7 @@ module cve2_multdiv_fast #(
   logic        [34:0] mac_res_ext;
   logic        [33:0] accum;
   logic        sign_a, sign_b;
+  logic        sign_c;
   logic        mult_valid;
   logic        signed_mult;
 
@@ -127,7 +129,7 @@ module cve2_multdiv_fast #(
   assign unused_mac_res_ext = mac_res_ext[34];
 
   assign signed_mult      = (signed_mode_i != 2'b00);
-  assign multdiv_result_o = div_sel_i ? imd_val_q_i[0][31:0] : mac_res_d[31:0];
+  assign multdiv_result_o = (div_sel_i ? imd_val_q_i[0][31:0] : mac_res_d[31:0]);
 
   // The single cycle multiplier uses three 17 bit multipliers to compute MUL instructions in a
   // single cycle and MULH instructions in two cycles.
@@ -290,7 +292,8 @@ module cve2_multdiv_fast #(
           mult_op_b = op_b_i[`OP_L];
           sign_a    = 1'b0;
           sign_b    = 1'b0;
-          accum     = '0;
+          accum     = (operator_i == MD_OP_MACCH || operator_i == MD_OP_MACCL)
+                      ? {{2{op_c_i[31]}}, op_c_i} : '0;
           mac_res_d = mac_res;
           mult_state_d = ALBH;
         end
@@ -303,7 +306,7 @@ module cve2_multdiv_fast #(
           sign_b    = signed_mode_i[1] & op_b_i[31];
           // result of AL*BL (in imd_val_q_i[0]) always unsigned with no carry
           accum     = {18'b0, imd_val_q_i[0][31:16]};
-          if (operator_i == MD_OP_MULL) begin
+          if (operator_i == MD_OP_MULL || operator_i == MD_OP_MACCL) begin
             mac_res_d = {2'b0, mac_res[`OP_L], imd_val_q_i[0][`OP_L]};
           end else begin
             // MD_OP_MULH
@@ -318,7 +321,7 @@ module cve2_multdiv_fast #(
           mult_op_b = op_b_i[`OP_L];
           sign_a    = signed_mode_i[0] & op_a_i[31];
           sign_b    = 1'b0;
-          if (operator_i == MD_OP_MULL) begin
+          if (operator_i == MD_OP_MULL || operator_i == MD_OP_MACCL) begin
             accum        = {18'b0, imd_val_q_i[0][31:16]};
             mac_res_d    = {2'b0, mac_res[15:0], imd_val_q_i[0][15:0]};
             mult_valid   = 1'b1;
