@@ -177,12 +177,14 @@ package cve2_pkg;
     ALU_CRC32C_W
   } alu_op_e;
 
-  typedef enum logic [1:0] {
+  typedef enum logic [2:0] {
     // Multiplier/divider
     MD_OP_MULL,
     MD_OP_MULH,
     MD_OP_DIV,
-    MD_OP_REM
+    MD_OP_REM,
+    MD_OP_MACCL,
+    MD_OP_MACCH
   } md_op_e;
 
 
