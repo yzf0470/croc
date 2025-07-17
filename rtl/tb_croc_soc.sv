@@ -438,6 +438,11 @@ module tb_croc_soc #(
     /////////////////
 
     logic [31:0] tb_data;
+    int unsigned cycle_count;
+
+    always @(posedge clk) begin
+      cycle_count <= cycle_count + 1;
+    end
 
     initial begin
         $timeformat(-9, 0, "ns", 12); // 1: scale (ns=-9), 2: decimals, 3: suffix, 4: print-field width
@@ -470,9 +475,11 @@ module tb_croc_soc #(
         // resume core
         jtag_resume();
 
+        cycle_count = 0;
         // wait for non-zero return value (written into core status register)
         $display("@%t | [CORE] Wait for end of code...", $time);
         jtag_wait_for_eoc(tb_data);
+        $display("Program cycles: %d", cycle_count);
 
         // finish simulation
         repeat(50) @(posedge clk);
