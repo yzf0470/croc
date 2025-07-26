@@ -12,7 +12,7 @@ INCDIR  ?= lib/inc
 # Toolchain
 
 RISCV_XLEN    ?= 32
-RISCV_MARCH   ?= rv$(RISCV_XLEN)i_zicsr
+RISCV_MARCH   ?= rv$(RISCV_XLEN)im_zicsr
 RISCV_MABI    ?= ilp32
 RISCV_PREFIX  ?= riscv64-unknown-elf-
 RISCV_CC      ?= $(RISCV_PREFIX)gcc
@@ -25,7 +25,8 @@ RISCV_LD      ?= $(RISCV_PREFIX)ld
 RISCV_STRIP   ?= $(RISCV_PREFIX)strip
 
 RISCV_FLAGS    ?= -march=$(RISCV_MARCH) -mabi=$(RISCV_MABI) -mcmodel=medany -static -std=gnu99 -Os -nostdlib -fno-builtin -ffreestanding
-RISCV_CCFLAGS  ?= $(RISCV_FLAGS) -Iinclude -I$(INCDIR) -I$(CURDIR)
+DEFINES ?=
+RISCV_CCFLAGS  ?= $(RISCV_FLAGS) -Iinclude -I$(INCDIR) -I$(CURDIR) $(DEFINES)
 RISCV_LDFLAGS  ?= -static -nostartfiles -lm -lgcc -lc $(RISCV_FLAGS)
 
 # all

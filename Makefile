@@ -51,7 +51,7 @@ clean-deps:
 SW_HEX := sw/bin/helloworld.hex
 
 $(SW_HEX): sw/*.c sw/*.h sw/*.S sw/*.ld
-	$(MAKE) -C sw/ compile
+	$(MAKE) -C sw/ compile DEFINES=$(DEFINES)
 
 ## Build all top-level programs in sw/
 software: $(SW_HEX)
